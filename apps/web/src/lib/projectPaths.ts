@@ -1,0 +1,17 @@
+export {
+  appendBrowsePathSegment,
+  canNavigateUp,
+  ensureBrowseDirectoryPath,
+  findProjectByPath,
+  getBrowseDirectoryPath,
+  getBrowseLeafPathSegment,
+  getBrowseParentPath,
+  hasTrailingPathSeparator,
+  inferProjectTitleFromPath,
+  isExplicitRelativeProjectPath,
+  isFilesystemBrowseQuery,
+  isUnsupportedWindowsProjectPath,
+  normalizeProjectPathForComparison,
+  normalizeProjectPathForDispatch,
+  resolveProjectPathForDispatch,
+} from "@trumbo-code/client-runtime/state/projects";

@@ -1,0 +1,92 @@
+import { relayClerkTokenOptions } from "@trumbo-code/shared/relayAuth";
+import { DEFAULT_TRUMBO_RELAY_URL, normalizeSecureRelayUrl } from "@trumbo-code/shared/relayUrl";
+import * as Schema from "effect/Schema";
+
+import { isNativeTrumboDesktop } from "../lib/nativeTrumboDesktop";
+
+export class CloudPublicConfigMissingError extends Schema.TaggedErrorClass<CloudPublicConfigMissingError>()(
+  "CloudPublicConfigMissingError",
+  {
+    key: Schema.Literal("TRUMBO_CODE_CLERK_JWT_TEMPLATE"),
+  },
+) {
+  override get message(): string {
+    return `${this.key} is not configured.`;
+  }
+}
+
+export interface CloudPublicConfig {
+  readonly clerkPublishableKey: string | null;
+  readonly clerkJwtTemplate: string | null;
+  readonly relayUrl: string | null;
+  readonly relayTracing: {
+    readonly tracesUrl: string | null;
+    readonly tracesDataset: string | null;
+    readonly tracesToken: string | null;
+  };
+}
+
+function trimNonEmpty(value: string | undefined): string | null {
+  return value?.trim() || null;
+}
+
+function normalizeSecureUrl(value: string): string | null {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" ? url.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
+export function resolveCloudPublicConfig(): CloudPublicConfig {
+  const nativeDesktop = typeof window !== "undefined" && isNativeTrumboDesktop();
+  return {
+    clerkPublishableKey: trimNonEmpty(
+      import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefined,
+    ),
+    clerkJwtTemplate: trimNonEmpty(import.meta.env.VITE_CLERK_JWT_TEMPLATE as string | undefined),
+    relayUrl: nativeDesktop
+      ? null
+      : normalizeSecureRelayUrl(
+          (import.meta.env.VITE_TRUMBO_CODE_RELAY_URL as string | undefined)?.trim() ||
+            DEFAULT_TRUMBO_RELAY_URL,
+        ),
+    relayTracing: {
+      tracesUrl: normalizeSecureUrl(
+        (import.meta.env.VITE_RELAY_OTLP_TRACES_URL as string | undefined) ?? "",
+      ),
+      tracesDataset: trimNonEmpty(
+        import.meta.env.VITE_RELAY_OTLP_TRACES_DATASET as string | undefined,
+      ),
+      tracesToken: trimNonEmpty(import.meta.env.VITE_RELAY_OTLP_TRACES_TOKEN as string | undefined),
+    },
+  };
+}
+
+export function resolveRelayTracingConfig() {
+  const { relayTracing } = resolveCloudPublicConfig();
+  return relayTracing.tracesUrl && relayTracing.tracesDataset && relayTracing.tracesToken
+    ? {
+        tracesUrl: relayTracing.tracesUrl,
+        tracesDataset: relayTracing.tracesDataset,
+        tracesToken: relayTracing.tracesToken,
+      }
+    : null;
+}
+
+export function hasCloudPublicConfig(): boolean {
+  if (typeof window !== "undefined" && isNativeTrumboDesktop()) {
+    return false;
+  }
+  const config = resolveCloudPublicConfig();
+  return Boolean(config.clerkPublishableKey && config.clerkJwtTemplate && config.relayUrl);
+}
+
+export function resolveRelayClerkTokenOptions() {
+  const { clerkJwtTemplate } = resolveCloudPublicConfig();
+  if (!clerkJwtTemplate) {
+    throw new CloudPublicConfigMissingError({ key: "TRUMBO_CODE_CLERK_JWT_TEMPLATE" });
+  }
+  return relayClerkTokenOptions(clerkJwtTemplate);
+}

@@ -1,0 +1,49 @@
+name: Build macOS
+on: workflow_dispatch
+jobs:
+  build:
+    name: macOS DMG
+    runs-on: macos-14
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version-file: package.json
+          cache: true
+          run-install: true
+
+      - name: Ensure Electron runtime
+        run: vp run --filter @trumbo-code/desktop ensure:electron
+
+      - name: Build desktop DMG
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: |
+          set -euo pipefail
+          vp run dist:desktop:artifact \
+            --platform mac \
+            --target dmg \
+            --arch arm64 \
+            --verbose
+
+      - name: Collect artifacts
+        run: |
+          set -euo pipefail
+          mkdir -p release-publish
+          shopt -s nullglob
+          for f in release/*.dmg release/*.zip release/*.yml release/*.blockmap; do
+            [ -f "$f" ] && cp "$f" release-publish/
+          done
+          ls -lh release-publish/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-mac-arm64
+          path: release-publish/*
+          if-no-files-found: error
+          retention-days: 14

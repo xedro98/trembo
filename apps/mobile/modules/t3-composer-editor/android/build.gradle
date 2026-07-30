@@ -1,0 +1,19 @@
+apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.kotlin.android'
+
+group = 'com.trumbo.composereditor'
+version = '0.0.0'
+
+android {
+  namespace 'expo.modules.trumbo-codecomposereditor'
+  compileSdk rootProject.ext.compileSdkVersion
+
+  defaultConfig {
+    minSdkVersion rootProject.ext.minSdkVersion
+    targetSdkVersion rootProject.ext.targetSdkVersion
+  }
+}
+
+dependencies {
+  implementation project(':expo-modules-core')
+}

@@ -1,0 +1,27 @@
+{
+  "unpinOpus47LaunchEffort": true,
+  "unpinOpus48LaunchEffort": true,
+  "unpinFable5LaunchEffort": true,
+  "firstStartTime": "2026-07-20T17:01:54.877Z",
+  "machineID": "23bb0143ed49049fcdfc2bf95ddcc98af6427755f094dfe0c4c68f17b22303cd",
+  "opusProMigrationComplete": true,
+  "sonnet1m45MigrationComplete": true,
+  "seenNotifications": {},
+  "hasResetAutoModeOptInForDefaultOffer": true,
+  "migrationVersion": 13,
+  "userID": "359a578e3908560f1712609770570fcbf2834d96329ef27bb0af9829963dfdba",
+  "projects": {
+    "D:/Torch/trumbo-code": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": false,
+      "projectOnboardingSeenCount": 0,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesWarningShown": false,
+      "hasUnseenTeamArtifacts": false
+    }
+  }
+}
